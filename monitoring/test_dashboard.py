@@ -21,14 +21,34 @@ def test_dashboard_launch(tmp_path, monkeypatch):
         "Agg", force=True
     )  # Forces Matplotlib to use the non-interactive backend
 
-    # Make sure font cache is writable in CI/containers
-    monkeypatch.setenv("MPLCONFIGDIR", str(tmp_path / ".mplconfig"))
-    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / ".cache"))
+    # Register DejaVu from Matplotlib's own package
+    from matplotlib import font_manager as fm
+    dejavu_dir = Path(matplotlib.get_data_path()) / "fonts" / "ttf"
 
-    # Prefer the bundled DejaVu font
+    # Add a few key DejaVu faces explicitly
+    for fname in [
+        "DejaVuSans.ttf",
+        "DejaVuSans-Bold.ttf",
+        "DejaVuSerif.ttf",
+        "DejaVuSansMono.ttf",
+    ]:
+        fpath = dejavu_dir / fname
+        if fpath.exists():
+            fm.fontManager.addfont(str(fpath))
+
+    # Rebuild the font cache so the added fonts are visible immediately
+    try:
+        fm._rebuild()  # older mpl
+    except Exception:
+        fm._load_fontmanager(try_read_cache=False)  # newer mpl fallback
+
+    # Prefer DejaVu (and provide both Sans/Serif to satisfy 'DejaVu' requests)
     matplotlib.rcParams.update({
-        "font.family": "DejaVu Sans",
+        "font.family": ["DejaVu Sans", "DejaVu Serif", "sans-serif", "serif"],
         "font.sans-serif": ["DejaVu Sans", "sans-serif"],
+        "font.serif": ["DejaVu Serif", "serif"],
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
     })
 
     # Stub the training dataset so the app doesn't a real CSV
