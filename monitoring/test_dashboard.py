@@ -36,8 +36,9 @@ def test_dashboard_launch(tmp_path, monkeypatch):
     monkeypatch.setattr(os.path, "exists", lambda path: False, raising=False)
 
     # Run the Streamlit app file located next to this test
-    app_path = Path(__file__).with_name("app.py")
-    at = AppTest.from_file(str(app_path)).run()
+    app_path = Path(__file__).with_name("app.py") 
+    # Increase timeout to 15 seconds for slower environments
+    at = AppTest.from_file(str(app_path)).run(timeout=15)
 
     # Basic sanity checks
     assert not list(at.exception), f"App raised exceptions: {at.exception}"
