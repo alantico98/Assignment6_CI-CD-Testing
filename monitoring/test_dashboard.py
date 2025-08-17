@@ -21,6 +21,16 @@ def test_dashboard_launch(tmp_path, monkeypatch):
         "Agg", force=True
     )  # Forces Matplotlib to use the non-interactive backend
 
+    # Make sure font cache is writable in CI/containers
+    monkeypatch.setenv("MPLCONFIGDIR", str(tmp_path / ".mplconfig"))
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / ".cache"))
+
+    # Prefer the bundled DejaVu font
+    matplotlib.rcParams.update({
+        "font.family": "DejaVu Sans",
+        "font.sans-serif": ["DejaVu Sans", "sans-serif"],
+    })
+
     # Stub the training dataset so the app doesn't a real CSV
     stub_df = pd.DataFrame(
         {
