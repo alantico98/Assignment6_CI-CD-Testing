@@ -2,7 +2,7 @@ import json
 import requests
 from sklearn.metrics import accuracy_score
 
-API_URL = "http://localhost:8000/predict"
+API_URL = "http://localhost:8000/predict"  # replace with your EC2 URL
 TEST_DATA_FILE = "test.json"
 
 
